@@ -41,6 +41,7 @@ def main():
                 log_event("player_hit")
                 print("Game over!")
                 sys.exit()
+        
         pygame.display.flip()
         
 
