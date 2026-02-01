@@ -1,5 +1,4 @@
 import pygame
-import sys
 from constants import *
 from logger import log_state, log_event
 from player import Player
@@ -12,6 +11,7 @@ def main():
     pygame.init()
     clock = pygame.time.Clock()
     dt = 0
+    game_over = False
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
@@ -32,19 +32,39 @@ def main():
             if event.type == pygame.QUIT:
                 return
         dt = clock.tick(60)/1000
-        updatable.update(dt)
+
+        if not game_over:
+            updatable.update(dt)
         
         screen.fill("black")
         
-        for object in drawable:
-            object.draw(screen)
+        if game_over:
+            font_big = pygame.font.Font(None, 72)
+            font_small = pygame.font.Font(None, 36)
+
+            game_over_text = font_big.render("Game Over!", True, (255, 255, 255))
+            score_text = font_small.render(f"Score: {score.get_score()}", True, (255, 255, 255))
+
+            game_over_rect = game_over_text.get_rect(
+                center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3)
+            )
+            score_rect = score_text.get_rect(
+                center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+            )
+
+            screen.blit(game_over_text, game_over_rect)
+            screen.blit(score_text, score_rect)
+
+        if not game_over:
+            for object in drawable:
+                object.draw(screen)
         
         for asteroid in asteroids:
             if asteroid.collides_with(player):
                 log_event("player_hit")
                 print("Game over!")
                 print(f"Total score: {score.get_score()}")
-                sys.exit()
+                game_over = True
             for shot in shots:
                 if shot.collides_with(asteroid):
                     log_event("asteroid_shot")
